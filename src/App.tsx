@@ -1,42 +1,49 @@
-import { useState } from 'react'
-import Button from '@mui/material/Button';
-import Container from '@mui/material/Container';
-import Box from '@mui/material/Box';
+import { useState, useEffect, Suspense } from "react";
+import { ThemeProvider, StyledEngineProvider } from "@mui/material";
+import { darkTheme, lightTheme } from "./assets/theme";
+import CssBaseline from "@mui/material/CssBaseline";
+import "./App.css";
+import ScrollToTop from "./components/ScrollToTop";
+import { BrowserRouter } from "react-router-dom";
+import Routes from "./Routes";
+import ThemeContext from "./contexts/themeContext";
+import LoaderContext from "./contexts/loaderContext";
 
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+// declare module '@mui/styles/defaultTheme' {
+//   // eslint-disable-next-line @typescript-eslint/no-empty-interface
+//   interface DefaultTheme extends Theme {}
+// }
 
 function App() {
-  const [count, setCount] = useState(0)
-
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  useEffect(() => {
+    if (
+      window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches
+    ) {
+      setIsDarkMode(true);
+    } else {
+      setIsDarkMode(false);
+    }
+  }, []);
   return (
-    <Container maxWidth="sm">
-      <Box sx={{ my: 4 }}>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Completely Different</h1>
-      <div className="card">
-        <Button variant="outlined">Hello World</Button>
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </Box>
-    </Container>
-  )
+    <BrowserRouter>
+      <Suspense fallback={<div></div>}>
+        <ThemeContext.Provider value={{ isDarkMode, setIsDarkMode }}>
+          <LoaderContext.Provider value={{ isLoading, setIsLoading }}>
+            <StyledEngineProvider injectFirst>
+              <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
+                <CssBaseline />
+                <ScrollToTop />
+                <Routes />
+              </ThemeProvider>
+            </StyledEngineProvider>
+          </LoaderContext.Provider>
+        </ThemeContext.Provider>
+      </Suspense>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;
